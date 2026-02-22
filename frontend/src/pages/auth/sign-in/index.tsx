@@ -10,9 +10,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router'
 import Logo from '@/assets/logo.svg'
+import { useAuthStore } from "@/stores/auth";
 
 export default function SignIn() {
-  // const authStoreInstance = useAuthStore(); // TODO authstore
+  const authStoreInstance = useAuthStore();
   const navigate = useNavigate();
 
   const {
@@ -21,14 +22,13 @@ export default function SignIn() {
     formState:
     { errors, isSubmitting }, reset } = useForm<ISignInSchema>({
       resolver: zodResolver(signInSchema),
-      defaultValues: { username: "", password: "" },
+      defaultValues: { email: "", password: "" },
       mode: "onSubmit",
       reValidateMode: "onChange",
     });
 
   async function onSubmit(data: ISignInSchema) {
-    // const result = await loginHandlers.signIn(data, authStoreInstance);
-    const result = true; // TODO login handlers
+    const result = await authStoreInstance.signIn(data);
     if (!result) return;
     reset();
   }
@@ -43,20 +43,20 @@ export default function SignIn() {
         </div>
         <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>
           <div className="flex flex-col gap-1">
-            <Label htmlFor="username" className="text-base text-muted-foreground flex items-center gap-2">
+            <Label htmlFor="email" className="text-base text-muted-foreground flex items-center gap-2">
               <Mail className="h-4 w-4 text-foreground" />
               E-mail
             </Label>
             <Input
-              id="username"
+              id="email"
               className="rounded-sm px-3"
               placeholder="mail@exemplo.com"
-              aria-invalid={!!errors.username}
-              {...register("username")}
-              autoComplete="new-username"
+              aria-invalid={!!errors.email}
+              {...register("email")}
+              autoComplete="new-email"
             />
-            {errors.username && (
-              <span className="text-sm text-destructive">{errors.username.message}</span>
+            {errors.email && (
+              <span className="text-sm text-destructive">{errors.email.message}</span>
             )}
           </div>
 

@@ -4,31 +4,33 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signInSchema, type ISignInSchema } from "./schemas";
+import { signUpSchema, type ISignUpSchema } from "./schemas";
 import { Mail, Lock, LogIn, User } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router";
 import Logo from '@/assets/logo.svg'
+import { useAuthStore } from "@/stores/auth";
 
 export default function SignUp() {
-  // const authStoreInstance = useAuthStore(); // TODO authstore
+  const authStoreInstance = useAuthStore();
+
   const navigate = useNavigate();
   const {
     register,
     handleSubmit,
     formState:
-    { errors, isSubmitting }, reset } = useForm<ISignInSchema>({
-      resolver: zodResolver(signInSchema),
-      defaultValues: { username: "", password: "" },
+    { errors, isSubmitting }, reset } = useForm<ISignUpSchema>({
+      resolver: zodResolver(signUpSchema),
+      defaultValues: { name: "", email: "", password: "" },
       mode: "onSubmit",
       reValidateMode: "onChange",
     });
 
-  async function onSubmit(data: ISignInSchema) {
-    // const result = await loginHandlers.signIn(data, authStoreInstance);
-    const result = true; // TODO login handlers
+  async function onSubmit(data: ISignUpSchema) {
+    const result = await authStoreInstance.signUp(data);
     if (!result) return;
     reset();
+    // TODO redirect to home page
   }
 
   return (
@@ -46,32 +48,32 @@ export default function SignUp() {
               Nome completo
             </Label>
             <Input
-              id="username"
+              id="name"
               className="rounded-sm px-3"
-              placeholder="mail@exemplo.com"
-              aria-invalid={!!errors.username}
-              {...register("username")}
-              autoComplete="new-username"
+              placeholder="Digite seu nome"
+              aria-invalid={!!errors.name}
+              {...register("name")}
+              autoComplete="new-name"
             />
-            {errors.username && (
-              <span className="text-sm text-destructive">{errors.username.message}</span>
+            {errors.name && (
+              <span className="text-sm text-destructive">{errors.name.message}</span>
             )}
           </div>
           <div className="flex flex-col gap-1">
-            <Label htmlFor="username" className="text-base text-muted-foreground flex items-center gap-2">
+            <Label htmlFor="email" className="text-base text-muted-foreground flex items-center gap-2">
               <Mail className="h-4 w-4 text-foreground" />
               E-mail
             </Label>
             <Input
-              id="username"
+              id="email"
               className="rounded-sm px-3"
               placeholder="mail@exemplo.com"
-              aria-invalid={!!errors.username}
-              {...register("username")}
-              autoComplete="new-username"
+              aria-invalid={!!errors.email}
+              {...register("email")}
+              autoComplete="new-email"
             />
-            {errors.username && (
-              <span className="text-sm text-destructive">{errors.username.message}</span>
+            {errors.email && (
+              <span className="text-sm text-destructive">{errors.email.message}</span>
             )}
           </div>
 
