@@ -24,7 +24,7 @@ import { TRANSACTION_TYPES } from "../types";
 
 interface TransactionsFiltersProps {
   filters: Filters;
-  categories: string[];
+  categories: { id: string; name: string }[];
   onDescriptionChange: (value: string) => void;
   onTypeChange: (value: TransactionType | "") => void;
   onCategoryChange: (value: string) => void;
@@ -46,7 +46,7 @@ export function TransactionsFilters({
     : "Selecione";
 
   const hasActiveFilters =
-    !!filters.description || !!filters.type || !!filters.category || !!filters.period;
+    !!filters.description || !!filters.type || !!filters.categoryId || !!filters.period;
 
   return (
     <Card>
@@ -87,7 +87,7 @@ export function TransactionsFilters({
           <div className="space-y-2">
             <Label>Categoria</Label>
             <Select
-              value={filters.category || "all"}
+              value={filters.categoryId || "all"}
               onValueChange={(v) => onCategoryChange(v === "all" ? "" : v)}
             >
               <SelectTrigger className="w-full">
@@ -96,8 +96,8 @@ export function TransactionsFilters({
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {cat.name}
                   </SelectItem>
                 ))}
               </SelectContent>

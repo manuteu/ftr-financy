@@ -22,7 +22,7 @@ import { Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Transaction } from "../types";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 1;
 
 interface TransactionsTableProps {
   transactions: Transaction[];

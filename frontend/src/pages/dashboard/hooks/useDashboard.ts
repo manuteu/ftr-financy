@@ -3,7 +3,9 @@ import { GET_DASHBOARD } from "@/lib/graphql/queries/Dashboard"
 import type { DashboardData, DashboardTransaction } from "../types"
 
 type GetDashboardQueryData = {
-  transactions: DashboardTransaction[]
+  transactions: {
+    transactions: DashboardTransaction[]
+  }
 }
 
 function computeDashboardData(transactions: DashboardTransaction[]): DashboardData {
@@ -61,7 +63,9 @@ function computeDashboardData(transactions: DashboardTransaction[]): DashboardDa
 export function useDashboard() {
   const { data, loading, error } = useQuery<GetDashboardQueryData>(GET_DASHBOARD)
 
-  const dashboardData = data?.transactions ? computeDashboardData(data.transactions) : null
+  const dashboardData = data?.transactions
+    ? computeDashboardData(data.transactions.transactions)
+    : null
 
   return { dashboardData, loading, error }
 }

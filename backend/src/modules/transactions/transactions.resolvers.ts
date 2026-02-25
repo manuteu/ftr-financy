@@ -2,16 +2,53 @@ import { GraphQLContext } from '../../shared/graphql/context';
 
 export const transactionResolvers = {
   Query: {
-    transactions: async (_: any, __: any, context: GraphQLContext) => {
+    transactions: async (
+      _: any,
+      args: {
+        description?: string;
+        type?: string;
+        categoryId?: string;
+        startDate?: Date;
+        endDate?: Date;
+        page?: number;
+        pageSize?: number;
+      },
+      context: GraphQLContext
+    ) => {
       if (!context.userId) {
         throw new Error('Não autenticado');
       }
 
-      return context.prisma.transaction.findMany({
-        where: { userId: context.userId },
-        include: { category: true },
-        orderBy: { date: 'desc' },
-      });
+      const where: Record<string, any> = { userId: context.userId };
+
+      if (args.description) {
+        where.description = { contains: args.description };
+      }
+      if (args.type) {
+        where.type = args.type;
+      }
+      if (args.categoryId) {
+        where.categoryId = args.categoryId;
+      }
+      if (args.startDate && args.endDate) {
+        where.date = { gte: args.startDate, lte: args.endDate };
+      }
+
+      const isPaginated = args.page !== undefined && args.page !== null;
+      const page = args.page ?? 1;
+      const pageSize = args.pageSize ?? 10;
+
+      const [transactions, totalCount] = await Promise.all([
+        context.prisma.transaction.findMany({
+          where,
+          include: { category: true },
+          orderBy: { date: 'desc' },
+          ...(isPaginated ? { skip: (page - 1) * pageSize, take: pageSize } : {}),
+        }),
+        context.prisma.transaction.count({ where }),
+      ]);
+
+      return { transactions, totalCount };
     },
 
     transaction: async (

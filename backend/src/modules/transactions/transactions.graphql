@@ -10,6 +10,11 @@ type Transaction {
   updatedAt: Date!
 }
 
+type TransactionsResult {
+  transactions: [Transaction!]!
+  totalCount: Int!
+}
+
 type Mutation {
   createTransaction(
     description: String!
@@ -30,6 +35,14 @@ type Mutation {
 }
 
 type Query {
-  transactions: [Transaction!]!
+  transactions(
+    description: String
+    type: String
+    categoryId: String
+    startDate: Date
+    endDate: Date
+    page: Int
+    pageSize: Int
+  ): TransactionsResult!
   transaction(id: ID!): Transaction
 }

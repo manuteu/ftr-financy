@@ -13,7 +13,7 @@ export interface Transaction {
 export interface TransactionFilters {
   description: string;
   type: TransactionType | "";
-  category: string;
+  categoryId: string;
   period: Date | null;
 }
 

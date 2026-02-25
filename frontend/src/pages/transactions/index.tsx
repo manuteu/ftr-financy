@@ -10,7 +10,7 @@ export default function Transactions() {
     availableCategories,
     setDescription,
     setType,
-    setCategory,
+    setCategoryId,
     setPeriod,
     clearFilters,
     transactions,
@@ -52,7 +52,7 @@ export default function Transactions() {
         categories={availableCategories}
         onDescriptionChange={setDescription}
         onTypeChange={setType}
-        onCategoryChange={setCategory}
+        onCategoryChange={setCategoryId}
         onPeriodChange={setPeriod}
         onClear={clearFilters}
       />

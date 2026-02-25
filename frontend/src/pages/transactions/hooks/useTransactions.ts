@@ -1,8 +1,9 @@
 import { useMemo, useState, useCallback } from "react";
-import { startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
+import { startOfMonth, endOfMonth } from "date-fns";
 import { useQuery } from "@apollo/client/react";
 import type { Transaction, TransactionFilters } from "../types";
 import { GET_TRANSACTIONS } from "@/lib/graphql/queries/Transactions";
+import { GET_CATEGORIES } from "@/lib/graphql/queries/Categories";
 import { PAGE_SIZE } from "../components/TransactionsTable";
 
 type GqlTransaction = {
@@ -20,8 +21,14 @@ type GqlTransaction = {
 };
 
 type GetTransactionsData = {
-  transactions: GqlTransaction[];
+  transactions: {
+    transactions: GqlTransaction[];
+    totalCount: number;
+  };
 };
+
+type GqlCategory = { id: string; name: string };
+type GetCategoriesData = { categories: GqlCategory[] };
 
 function mapTransaction(t: GqlTransaction): Transaction {
   return {
@@ -35,35 +42,10 @@ function mapTransaction(t: GqlTransaction): Transaction {
   };
 }
 
-function filterTransactions(
-  list: Transaction[],
-  filters: TransactionFilters
-): Transaction[] {
-  return list.filter((t) => {
-    if (
-      filters.description &&
-      !t.description
-        .toLowerCase()
-        .includes(filters.description.trim().toLowerCase())
-    ) {
-      return false;
-    }
-    if (filters.type && t.type !== filters.type) return false;
-    if (filters.category && t.category !== filters.category) return false;
-    if (filters.period) {
-      const date = new Date(t.date);
-      const start = startOfMonth(filters.period);
-      const end = endOfMonth(filters.period);
-      if (!isWithinInterval(date, { start, end })) return false;
-    }
-    return true;
-  });
-}
-
 const defaultFilters: TransactionFilters = {
   description: "",
   type: "",
-  category: "",
+  categoryId: "",
   period: null,
 };
 
@@ -71,29 +53,33 @@ export function useTransactions() {
   const [filters, setFilters] = useState<TransactionFilters>(defaultFilters);
   const [page, setPage] = useState(1);
 
-  const { data, loading, error } = useQuery<GetTransactionsData>(GET_TRANSACTIONS);
+  const variables = useMemo(() => ({
+    description: filters.description || undefined,
+    type: filters.type || undefined,
+    categoryId: filters.categoryId || undefined,
+    startDate: filters.period ? startOfMonth(filters.period) : undefined,
+    endDate: filters.period ? endOfMonth(filters.period) : undefined,
+    page,
+    pageSize: PAGE_SIZE,
+  }), [filters, page]);
 
-  const allTransactions = useMemo(
-    () => (data?.transactions ?? []).map(mapTransaction),
+  const { data, loading, error } = useQuery<GetTransactionsData>(GET_TRANSACTIONS, {
+    variables,
+  });
+
+  const { data: categoriesData } = useQuery<GetCategoriesData>(GET_CATEGORIES);
+
+  const transactions = useMemo(
+    () => (data?.transactions.transactions ?? []).map(mapTransaction),
     [data]
   );
 
-  const availableCategories = useMemo(() => {
-    const names = new Set(
-      allTransactions.map((t) => t.category).filter((c) => c !== "Sem categoria")
-    );
-    return Array.from(names).sort();
-  }, [allTransactions]);
+  const totalCount = data?.transactions.totalCount ?? 0;
 
-  const filtered = useMemo(
-    () => filterTransactions(allTransactions, filters),
-    [allTransactions, filters]
+  const availableCategories = useMemo(
+    () => categoriesData?.categories ?? [],
+    [categoriesData]
   );
-
-  const paginated = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return filtered.slice(start, start + PAGE_SIZE);
-  }, [filtered, page]);
 
   const setDescription = useCallback((description: string) => {
     setFilters((f) => ({ ...f, description }));
@@ -105,8 +91,8 @@ export function useTransactions() {
     setPage(1);
   }, []);
 
-  const setCategory = useCallback((category: string) => {
-    setFilters((f) => ({ ...f, category }));
+  const setCategoryId = useCallback((categoryId: string) => {
+    setFilters((f) => ({ ...f, categoryId }));
     setPage(1);
   }, []);
 
@@ -125,11 +111,11 @@ export function useTransactions() {
     availableCategories,
     setDescription,
     setType,
-    setCategory,
+    setCategoryId,
     setPeriod,
     clearFilters,
-    transactions: paginated,
-    totalCount: filtered.length,
+    transactions,
+    totalCount,
     page,
     setPage,
     loading,
