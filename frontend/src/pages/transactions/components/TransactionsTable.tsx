@@ -2,7 +2,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -18,11 +17,12 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { formatCurrency, formatDate } from "@/utils/formatters";
-import { Pencil, Trash2 } from "lucide-react";
+import { SquarePen, Trash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Transaction } from "../types";
+import { DynamicIcon, type IconName } from "lucide-react/dynamic";
 
-const PAGE_SIZE = 1;
+const PAGE_SIZE = 10;
 
 interface TransactionsTableProps {
   transactions: Transaction[];
@@ -44,25 +44,17 @@ export function TransactionsTable({
   onDelete,
 }: TransactionsTableProps) {
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
-  const totalIncome = transactions.reduce(
-    (acc, t) => acc + (t.type === "income" ? t.value : 0),
-    0
-  );
-  const totalExpense = transactions.reduce(
-    (acc, t) => acc + (t.type === "expense" ? t.value : 0),
-    0
-  );
 
   return (
     <div className="rounded-xl border bg-card">
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Descrição</TableHead>
-              <TableHead>Data</TableHead>
-              <TableHead>Categoria</TableHead>
-              <TableHead>Tipo</TableHead>
+            <TableRow className="uppercase text-xs">
+              <TableHead className="text-left">Descrição</TableHead>
+              <TableHead className="text-center">Data</TableHead>
+              <TableHead className="text-center">Categoria</TableHead>
+              <TableHead className="text-center">Tipo</TableHead>
               <TableHead className="text-right">Valor</TableHead>
               <TableHead className="w-[100px] text-right">Ações</TableHead>
             </TableRow>
@@ -87,56 +79,67 @@ export function TransactionsTable({
             ) : (
               transactions.map((transaction) => (
                 <TableRow key={transaction.id}>
-                  <TableCell className="font-medium">
-                    {transaction.description}
+                  <TableCell className="font-medium flex items-center gap-4">
+                    <div className={cn(`size-10 shrink-0 flex items-center justify-center rounded-lg bg-${transaction.category.color}-100`)}>
+                      <DynamicIcon
+                        name={transaction.category.icon as IconName}
+                        className={cn(`text-${transaction.category.color}-800`)}
+                        size={16}
+                      />
+                    </div>
+                    <p className="text-base font-medium">{transaction.description}</p>
                   </TableCell>
-                  <TableCell>{formatDate(transaction.date)}</TableCell>
-                  <TableCell>{transaction.category}</TableCell>
-                  <TableCell>
+                  <TableCell className="text-center">{formatDate(transaction.date)}</TableCell>
+                  <TableCell className="text-center">
+                    <span className={cn(`px-3 py-1 bg-${transaction.category.color}-100 text-${transaction.category.color}-800 font-medium rounded-full`)}>
+                      {transaction.category.name}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-center">
                     <span
                       className={cn(
-                        "rounded-full px-2 py-0.5 text-xs font-medium",
+                        "px-2 py-0.5 text-sm font-medium flex items-center gap-2 justify-center",
                         transaction.type === "income"
-                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                          : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                          ? "text-green-600"
+                          : "text-red-600"
                       )}
                     >
-                      {transaction.type === "income" ? "Receita" : "Despesa"}
+                      <DynamicIcon
+                        name={transaction.type === "income" ? "circle-arrow-up" : "circle-arrow-down"}
+                        className={cn(transaction.type === "income" ? "text-green-600" : "text-red-600")}
+                        size={16}
+                      />
+                      {transaction.type === "income" ? "Entrada" : "Saída"}
                     </span>
                   </TableCell>
                   <TableCell
                     className={cn(
-                      "text-right font-medium",
-                      transaction.type === "income"
-                        ? "text-green-700 dark:text-green-400"
-                        : "text-red-700 dark:text-red-400"
+                      "text-right font-semibold"
                     )}
                   >
-                    {transaction.type === "income" ? "+" : "-"}
-                    {formatCurrency(
-                      transaction.type === "income"
-                        ? transaction.value
-                        : transaction.value
-                    )}
+                    {transaction.type === 'income' ? '+' : '-'}
+                    <span className="ml-1">
+                      {formatCurrency(transaction.value)}
+                    </span>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
                       <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label="Editar"
-                        onClick={() => onEdit(transaction)}
-                      >
-                        <Pencil className="size-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
+                        variant="outline"
                         size="icon-sm"
                         aria-label="Excluir"
                         className="text-destructive hover:text-destructive"
                         onClick={() => onDelete(transaction)}
                       >
-                        <Trash2 className="size-4" />
+                        <Trash className="size-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon-sm"
+                        aria-label="Editar"
+                        onClick={() => onEdit(transaction)}
+                      >
+                        <SquarePen className="size-4" />
                       </Button>
                     </div>
                   </TableCell>
@@ -144,77 +147,57 @@ export function TransactionsTable({
               ))
             )}
           </TableBody>
-          <TableFooter>
-            <TableRow>
-              <TableCell colSpan={4} className="font-medium">
-                Total (página)
-              </TableCell>
-              <TableCell className="text-right">
-                <span className="text-green-700 dark:text-green-400">
-                  +{formatCurrency(totalIncome)}
-                </span>
-                {" / "}
-                <span className="text-red-700 dark:text-red-400">
-                  -{formatCurrency(totalExpense)}
-                </span>
-              </TableCell>
-              <TableCell />
-            </TableRow>
-          </TableFooter>
         </Table>
       </div>
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between border-t px-4 py-3">
-          <p className="text-sm text-muted-foreground">
-            Página {page} de {totalPages} ({totalCount} registro
-            {totalCount !== 1 ? "s" : ""})
-          </p>
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (page > 1) onPageChange(page - 1);
-                  }}
-                  aria-disabled={page <= 1}
-                  className={cn(page <= 1 && "pointer-events-none opacity-50")}
-                />
-              </PaginationItem>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (p) => (
-                  <PaginationItem key={p}>
-                    <PaginationLink
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        onPageChange(p);
-                      }}
-                      isActive={page === p}
-                    >
-                      {p}
-                    </PaginationLink>
-                  </PaginationItem>
-                )
-              )}
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (page < totalPages) onPageChange(page + 1);
-                  }}
-                  aria-disabled={page >= totalPages}
-                  className={cn(
-                    page >= totalPages && "pointer-events-none opacity-50"
-                  )}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      )}
+      <div className="flex items-center justify-between border-t px-6 h-18">
+        <p className="text-sm text-muted-foreground">
+          {page} de {totalPages} | {totalCount} {totalCount !== 1 ? "resultados" : "resultado"}
+        </p>
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (page > 1) onPageChange(page - 1);
+                }}
+                aria-disabled={page <= 1}
+                className={cn(page <= 1 && "pointer-events-none opacity-50")}
+              />
+            </PaginationItem>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+              (p) => (
+                <PaginationItem key={p}>
+                  <PaginationLink
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onPageChange(p);
+                    }}
+                    isActive={page === p}
+                  >
+                    {p}
+                  </PaginationLink>
+                </PaginationItem>
+              )
+            )}
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (page < totalPages) onPageChange(page + 1);
+                }}
+                aria-disabled={page >= totalPages}
+                className={cn(
+                  page >= totalPages && "pointer-events-none opacity-50"
+                )}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
     </div>
   );
 }

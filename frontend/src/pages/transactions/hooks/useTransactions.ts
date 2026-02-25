@@ -17,7 +17,7 @@ type GqlTransaction = {
     name: string;
     color: string | null;
     icon: string | null;
-  } | null;
+  };
 };
 
 type GetTransactionsData = {
@@ -37,7 +37,7 @@ function mapTransaction(t: GqlTransaction): Transaction {
     value: t.amount,
     type: t.type as Transaction["type"],
     date: t.date,
-    category: t.category?.name ?? "Sem categoria",
+    category: t.category,
     categoryId: t.category?.id ?? null,
   };
 }

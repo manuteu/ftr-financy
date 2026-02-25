@@ -50,13 +50,13 @@ export function TransactionsFilters({
 
   return (
     <Card>
-      <CardContent className="pt-6">
+      <CardContent className="py-6">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-2">
             <Label htmlFor="filter-description">Descrição</Label>
             <Input
               id="filter-description"
-              placeholder="Buscar por descrição..."
+              placeholder="Buscar por descrição"
               value={filters.description}
               onChange={(e) => onDescriptionChange(e.target.value)}
             />
@@ -110,6 +110,7 @@ export function TransactionsFilters({
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
+                  size="lg"
                   className={cn(
                     "w-full justify-start text-left font-normal",
                     !filters.period && "text-muted-foreground"
