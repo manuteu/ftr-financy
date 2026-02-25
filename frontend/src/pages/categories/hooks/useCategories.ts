@@ -1,64 +1,24 @@
 import { useMemo } from "react";
+import { useQuery } from "@apollo/client/react";
 import type { Category } from "../types";
+import { GET_CATEGORIES } from "@/lib/graphql/queries/Categories";
+import { GET_TRANSACTIONS } from "@/lib/graphql/queries/Transactions";
 
-const MOCK_CATEGORIES: Category[] = [
-  {
-    id: "1",
-    title: "Alimentação",
-    description: "Restaurantes, supermercado e delivery",
-    color: "green",
-    transactionCount: 24,
-  },
-  {
-    id: "2",
-    title: "Transporte",
-    description: "Combustível, Uber e manutenção do carro",
-    color: "blue",
-    transactionCount: 12,
-  },
-  {
-    id: "3",
-    title: "Salário",
-    description: "Renda fixa mensal",
-    color: "purple",
-    transactionCount: 1,
-  },
-  {
-    id: "4",
-    title: "Lazer",
-    description: "Streaming, jogos e entretenimento",
-    color: "red",
-    transactionCount: 8,
-  },
-  {
-    id: "5",
-    title: "Saúde",
-    description: "Planos, medicamentos e consultas",
-    color: "teal",
-    transactionCount: 5,
-  },
-  {
-    id: "6",
-    title: "Educação",
-    description: "Cursos e materiais de estudo",
-    color: "orange",
-    transactionCount: 3,
-  },
-  {
-    id: "7",
-    title: "Casa",
-    description: "Contas de luz, água e internet",
-    color: "yellow",
-    transactionCount: 6,
-  },
-  {
-    id: "8",
-    title: "Outros",
-    description: "Despesas diversas",
-    color: "blue",
-    transactionCount: 15,
-  },
-];
+type GqlCategory = {
+  id: string;
+  name: string;
+  color: string | null;
+  icon: string | null;
+  description: string | null;
+};
+
+type GqlTransaction = {
+  id: string;
+  category: { id: string } | null;
+};
+
+type GetCategoriesData = { categories: GqlCategory[] };
+type GetTransactionsData = { transactions: GqlTransaction[] };
 
 export interface CategoriesStats {
   totalCategories: number;
@@ -67,7 +27,32 @@ export interface CategoriesStats {
 }
 
 export function useCategories() {
-  const categories = useMemo(() => MOCK_CATEGORIES, []);
+  const { data: categoriesData, loading: loadingCategories } =
+    useQuery<GetCategoriesData>(GET_CATEGORIES);
+
+  const { data: transactionsData, loading: loadingTransactions } =
+    useQuery<GetTransactionsData>(GET_TRANSACTIONS);
+
+  const categories = useMemo((): Category[] => {
+    const gqlCategories = categoriesData?.categories ?? [];
+    const transactions = transactionsData?.transactions ?? [];
+
+    const countMap = new Map<string, number>();
+    transactions.forEach((t) => {
+      if (t.category?.id) {
+        countMap.set(t.category.id, (countMap.get(t.category.id) ?? 0) + 1);
+      }
+    });
+
+    return gqlCategories.map((cat) => ({
+      id: cat.id,
+      name: cat.name,
+      color: cat.color,
+      icon: cat.icon,
+      transactionCount: countMap.get(cat.id) ?? 0,
+      description: cat.description ?? undefined,
+    }));
+  }, [categoriesData, transactionsData]);
 
   const stats = useMemo((): CategoriesStats => {
     const totalCategories = categories.length;
@@ -84,12 +69,12 @@ export function useCategories() {
             null
           );
 
-    return {
-      totalCategories,
-      totalTransactions,
-      mostUsedCategory,
-    };
+    return { totalCategories, totalTransactions, mostUsedCategory };
   }, [categories]);
 
-  return { categories, stats };
+  return {
+    categories,
+    stats,
+    loading: loadingCategories || loadingTransactions,
+  };
 }

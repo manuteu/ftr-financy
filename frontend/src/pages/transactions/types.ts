@@ -5,6 +5,7 @@ export interface Transaction {
   description: string;
   date: string;
   category: string;
+  categoryId: string | null;
   type: TransactionType;
   value: number;
 }
@@ -20,13 +21,3 @@ export const TRANSACTION_TYPES: { value: TransactionType; label: string }[] = [
   { value: "income", label: "Receita" },
   { value: "expense", label: "Despesa" },
 ];
-
-export const CATEGORIES = [
-  "Salário",
-  "Alimentação",
-  "Transporte",
-  "Saúde",
-  "Lazer",
-  "Educação",
-  "Outros",
-] as const;

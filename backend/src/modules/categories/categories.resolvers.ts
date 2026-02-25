@@ -40,7 +40,7 @@ export const categoryResolvers = {
   Mutation: {
     createCategory: async (
       _: any,
-      args: { name: string; color?: string; icon?: string },
+      args: { name: string; color?: string; icon?: string; description?: string },
       context: GraphQLContext
     ) => {
       if (!context.userId) {
@@ -52,6 +52,7 @@ export const categoryResolvers = {
           name: args.name,
           color: args.color,
           icon: args.icon,
+          description: args.description,
           userId: context.userId,
         },
       });
@@ -59,7 +60,7 @@ export const categoryResolvers = {
 
     updateCategory: async (
       _: any,
-      args: { id: string; name?: string; color?: string; icon?: string },
+      args: { id: string; name?: string; color?: string; icon?: string; description?: string },
       context: GraphQLContext
     ) => {
       if (!context.userId) {
@@ -83,6 +84,7 @@ export const categoryResolvers = {
           ...(args.name && { name: args.name }),
           ...(args.color !== undefined && { color: args.color }),
           ...(args.icon !== undefined && { icon: args.icon }),
+          ...(args.description !== undefined && { description: args.description }),
         },
       });
     },
@@ -105,6 +107,16 @@ export const categoryResolvers = {
 
       if (!category) {
         throw new Error('Categoria não encontrada');
+      }
+
+      const transactionCount = await context.prisma.transaction.count({
+        where: { categoryId: id, userId: context.userId },
+      });
+
+      if (transactionCount > 0) {
+        throw new Error(
+          `Esta categoria possui ${transactionCount} transação(ões) vinculada(s). Remova ou altere a categoria das transações antes de excluir.`
+        );
       }
 
       await context.prisma.category.delete({

@@ -1,43 +1,28 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronRight, Plus } from "lucide-react";
+import { ChevronRight } from "lucide-react";
+import { NewTransactionModal } from "./NewTransactionModal";
 import { DynamicIcon, type IconName } from "lucide-react/dynamic";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import type { DashboardTransaction } from "../types";
 
+interface RecentTransactionsListProps {
+  transactions: DashboardTransaction[]
+}
 
-export function RecentTransactionsList() {
+export function RecentTransactionsList({ transactions }: RecentTransactionsListProps) {
 
-  const recentTransactions = [
-    {
-      description: "Pagamento de Salário",
-      date: "2026-02-17T00:00:00.000Z",
-      value: 54230,
-      type: "income",
-      category: "Salário",
-      icon: "wallet",
-      color: "green",
-    },
-    {
-      description: "Jantar no Restaurante",
-      date: "2026-02-17T00:00:00.000Z",
-      value: 1230,
-      type: "expense",
-      category: "Alimentação",
-      icon: "utensils",
-      color: "red",
-    },
-    {
-      description: "Posto de Gasolina",
-      date: "2026-02-17T00:00:00.000Z",
-      value: 1230,
-      type: "expense",
-      category: "Transporte",
-      icon: "fuel",
-      color: "blue",
-    },
-  ]
+  const recentTransactions = transactions.map((t) => ({
+    description: t.description,
+    date: t.date,
+    value: t.amount,
+    type: t.type,
+    category: t.category?.name ?? "Sem categoria",
+    icon: t.category?.icon ?? "circle-dollar-sign",
+    color: t.category?.color ?? "green",
+  }))
 
   const colorMap = {
     green: {
@@ -107,10 +92,7 @@ export function RecentTransactionsList() {
         </div>
       </CardContent>
       <CardFooter className="p-2">
-        <Button variant="ghost" className="text-green-800 w-full">
-          <Plus size={16} />
-          Nova transação
-        </Button>
+        <NewTransactionModal />
       </CardFooter>
     </Card>
   )

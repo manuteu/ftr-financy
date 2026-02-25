@@ -3,6 +3,7 @@ type Category {
   name: String!
   color: String
   icon: String
+  description: String
   createdAt: Date!
   updatedAt: Date!
 }
@@ -12,12 +13,14 @@ type Mutation {
     name: String!
     color: String
     icon: String
+    description: String
   ): Category!
   updateCategory(
     id: ID!
     name: String
     color: String
     icon: String
+    description: String
   ): Category!
   deleteCategory(id: ID!): Boolean!
 }

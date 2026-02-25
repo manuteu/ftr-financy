@@ -4,6 +4,7 @@ import { apolloClient } from "@/lib/graphql/apollo"
 import type { User, SignUpInput, SignInInput } from '@/types'
 import { SIGN_UP } from '@/lib/graphql/mutations/SignUp'
 import { SIGN_IN } from '@/lib/graphql/mutations/SignIn'
+import storage from "@/storage"
 
 type SignUpMutationData = {
   signUp: {
@@ -111,7 +112,7 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: 'auth-storage'
+      name: storage.AUTH_TOKEN
     }
   )
 )

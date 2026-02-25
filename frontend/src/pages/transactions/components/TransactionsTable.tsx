@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Pagination,
   PaginationContent,
@@ -27,6 +28,7 @@ interface TransactionsTableProps {
   transactions: Transaction[];
   page: number;
   totalCount: number;
+  loading?: boolean;
   onPageChange: (page: number) => void;
   onEdit: (transaction: Transaction) => void;
   onDelete: (transaction: Transaction) => void;
@@ -36,6 +38,7 @@ export function TransactionsTable({
   transactions,
   page,
   totalCount,
+  loading = false,
   onPageChange,
   onEdit,
   onDelete,
@@ -65,7 +68,17 @@ export function TransactionsTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {transactions.length === 0 ? (
+            {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                  {Array.from({ length: 6 }).map((__, j) => (
+                    <TableCell key={j}>
+                      <Skeleton className="h-4 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : transactions.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
                   Nenhuma transação encontrada.

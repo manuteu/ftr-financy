@@ -1,50 +1,39 @@
 import { useMemo, useState, useCallback } from "react";
 import { startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
+import { useQuery } from "@apollo/client/react";
 import type { Transaction, TransactionFilters } from "../types";
+import { GET_TRANSACTIONS } from "@/lib/graphql/queries/Transactions";
 import { PAGE_SIZE } from "../components/TransactionsTable";
 
-const MOCK_TRANSACTIONS: Transaction[] = [
-  {
-    id: "1",
-    description: "Pagamento de Salário",
-    date: "2026-02-17T00:00:00.000Z",
-    value: 5423000,
-    type: "income",
-    category: "Salário",
-  },
-  {
-    id: "2",
-    description: "Jantar no Restaurante",
-    date: "2026-02-17T00:00:00.000Z",
-    value: 12300,
-    type: "expense",
-    category: "Alimentação",
-  },
-  {
-    id: "3",
-    description: "Posto de Gasolina",
-    date: "2026-02-18T00:00:00.000Z",
-    value: 25000,
-    type: "expense",
-    category: "Transporte",
-  },
-  {
-    id: "4",
-    description: "Freelance",
-    date: "2026-02-10T00:00:00.000Z",
-    value: 150000,
-    type: "income",
-    category: "Outros",
-  },
-  {
-    id: "5",
-    description: "Supermercado",
-    date: "2026-02-15T00:00:00.000Z",
-    value: 32000,
-    type: "expense",
-    category: "Alimentação",
-  },
-];
+type GqlTransaction = {
+  id: string;
+  description: string;
+  amount: number;
+  type: string;
+  date: string;
+  category: {
+    id: string;
+    name: string;
+    color: string | null;
+    icon: string | null;
+  } | null;
+};
+
+type GetTransactionsData = {
+  transactions: GqlTransaction[];
+};
+
+function mapTransaction(t: GqlTransaction): Transaction {
+  return {
+    id: t.id,
+    description: t.description,
+    value: t.amount,
+    type: t.type as Transaction["type"],
+    date: t.date,
+    category: t.category?.name ?? "Sem categoria",
+    categoryId: t.category?.id ?? null,
+  };
+}
 
 function filterTransactions(
   list: Transaction[],
@@ -82,9 +71,23 @@ export function useTransactions() {
   const [filters, setFilters] = useState<TransactionFilters>(defaultFilters);
   const [page, setPage] = useState(1);
 
+  const { data, loading, error } = useQuery<GetTransactionsData>(GET_TRANSACTIONS);
+
+  const allTransactions = useMemo(
+    () => (data?.transactions ?? []).map(mapTransaction),
+    [data]
+  );
+
+  const availableCategories = useMemo(() => {
+    const names = new Set(
+      allTransactions.map((t) => t.category).filter((c) => c !== "Sem categoria")
+    );
+    return Array.from(names).sort();
+  }, [allTransactions]);
+
   const filtered = useMemo(
-    () => filterTransactions(MOCK_TRANSACTIONS, filters),
-    [filters]
+    () => filterTransactions(allTransactions, filters),
+    [allTransactions, filters]
   );
 
   const paginated = useMemo(() => {
@@ -96,28 +99,40 @@ export function useTransactions() {
     setFilters((f) => ({ ...f, description }));
     setPage(1);
   }, []);
+
   const setType = useCallback((type: TransactionFilters["type"]) => {
     setFilters((f) => ({ ...f, type }));
     setPage(1);
   }, []);
+
   const setCategory = useCallback((category: string) => {
     setFilters((f) => ({ ...f, category }));
     setPage(1);
   }, []);
+
   const setPeriod = useCallback((period: Date | null) => {
     setFilters((f) => ({ ...f, period }));
     setPage(1);
   }, []);
 
+  const clearFilters = useCallback(() => {
+    setFilters(defaultFilters);
+    setPage(1);
+  }, []);
+
   return {
     filters,
+    availableCategories,
     setDescription,
     setType,
     setCategory,
     setPeriod,
+    clearFilters,
     transactions: paginated,
     totalCount: filtered.length,
     page,
     setPage,
+    loading,
+    error,
   };
 }

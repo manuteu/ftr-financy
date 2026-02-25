@@ -2,6 +2,7 @@ export type CategoryColor =
   | "green"
   | "blue"
   | "purple"
+  | "pink"
   | "red"
   | "yellow"
   | "orange"
@@ -9,10 +10,11 @@ export type CategoryColor =
 
 export interface Category {
   id: string;
-  title: string;
-  description: string;
-  color: CategoryColor;
+  name: string;
+  color: string | null;
+  icon: string | null;
   transactionCount: number;
+  description?: string;
 }
 
 export const CATEGORY_COLORS: Record<
@@ -33,6 +35,11 @@ export const CATEGORY_COLORS: Record<
     bg: "bg-purple-100 dark:bg-purple-900/30",
     text: "text-purple-800 dark:text-purple-400",
     icon: "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400",
+  },
+  pink: {
+    bg: "bg-pink-100 dark:bg-pink-900/30",
+    text: "text-pink-800 dark:text-pink-400",
+    icon: "bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400",
   },
   red: {
     bg: "bg-red-100 dark:bg-red-900/30",
@@ -55,3 +62,10 @@ export const CATEGORY_COLORS: Record<
     icon: "bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400",
   },
 };
+
+const FALLBACK_COLORS = CATEGORY_COLORS.blue;
+
+export function getCategoryColors(color: string | null) {
+  if (!color) return FALLBACK_COLORS;
+  return CATEGORY_COLORS[color as CategoryColor] ?? FALLBACK_COLORS;
+}

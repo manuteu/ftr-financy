@@ -1,23 +1,27 @@
-import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { NewTransactionModal } from "@/components/new-transaction-modal";
 import { TransactionsFilters, TransactionsTable } from "./components";
 import { useTransactions } from "./hooks/useTransactions";
 
 export default function Transactions() {
   const {
     filters,
+    availableCategories,
     setDescription,
     setType,
     setCategory,
     setPeriod,
+    clearFilters,
     transactions,
     totalCount,
     page,
     setPage,
+    loading,
   } = useTransactions();
 
   function handleEdit() {
-    // TODO: abrir modal/drawer de edição
+    // TODO: abrir modal de edição
   }
 
   function handleDelete() {
@@ -33,24 +37,31 @@ export default function Transactions() {
             Gerencie todas as suas transações financeiras.
           </p>
         </div>
-        <Button className="w-fit">
-          <Plus className="size-4" />
-          Nova transação
-        </Button>
+        <NewTransactionModal
+          trigger={
+            <Button className="w-fit">
+              <Plus className="size-4" />
+              Nova transação
+            </Button>
+          }
+        />
       </div>
 
       <TransactionsFilters
         filters={filters}
+        categories={availableCategories}
         onDescriptionChange={setDescription}
         onTypeChange={setType}
         onCategoryChange={setCategory}
         onPeriodChange={setPeriod}
+        onClear={clearFilters}
       />
 
       <TransactionsTable
         transactions={transactions}
         page={page}
         totalCount={totalCount}
+        loading={loading}
         onPageChange={setPage}
         onEdit={handleEdit}
         onDelete={handleDelete}

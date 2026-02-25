@@ -5,9 +5,10 @@ interface DashCardProps {
   icon: React.ReactNode;
   title: string;
   value: number;
+  loading?: boolean;
 }
 
-export default function DashCard({ icon, title, value }: DashCardProps) {
+export default function DashCard({ icon, title, value, loading }: DashCardProps) {
   return (
     <Card>
       <CardContent className="py-4 flex flex-col gap-2">
@@ -15,7 +16,11 @@ export default function DashCard({ icon, title, value }: DashCardProps) {
           {icon}
           <p className="text-xs font-medium text-muted-foreground uppercase">{title}</p>
         </div>
-        <p className="text-3xl font-bold text-foreground">{formatCurrency(value)}</p>
+        {loading ? (
+          <div className="h-9 w-32 animate-pulse rounded bg-muted" />
+        ) : (
+          <p className="text-3xl font-bold text-foreground">{formatCurrency(value)}</p>
+        )}
       </CardContent>
     </Card>
   )
