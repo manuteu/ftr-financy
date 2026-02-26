@@ -24,29 +24,6 @@ export function RecentTransactionsList({ transactions }: RecentTransactionsListP
     color: t.category?.color ?? "green",
   }))
 
-  const colorMap = {
-    green: {
-      bg: "bg-green-50",
-      text: "text-green-700",
-    },
-    blue: {
-      bg: "bg-blue-50",
-      text: "text-blue-700",
-    },
-    purple: {
-      bg: "bg-purple-50",
-      text: "text-purple-700",
-    },
-    red: {
-      bg: "bg-red-50",
-      text: "text-red-700",
-    },
-    yellow: {
-      bg: "bg-yellow-50",
-      text: "text-yellow-700",
-    },
-  }
-
   return (
     <Card className="gap-0">
       <CardHeader className="py-4 px-6">
@@ -61,22 +38,23 @@ export function RecentTransactionsList({ transactions }: RecentTransactionsListP
       <CardContent className="px-0">
         <div className="flex flex-col">
           {recentTransactions.map((transaction) => {
-            const colors = colorMap[transaction.color as keyof typeof colorMap]
+            const bgColorClass = `bg-${transaction.color.toLowerCase()}-50`
+            const textColorClass = `text-${transaction.color.toLowerCase()}-700`
 
             return (
               <>
                 <div key={transaction.description} className="flex flex-row items-center justify-between px-6 py-4">
                   <div className="flex flex-row items-center gap-3 flex-1">
-                    <Button variant="ghost" className={colors.bg} size="icon">
-                      <DynamicIcon name={transaction.icon as IconName} className={colors.text} />
+                    <Button variant="ghost" className={bgColorClass} size="icon">
+                      <DynamicIcon name={transaction.icon as IconName} className={textColorClass} />
                     </Button>
                     <div className="flex flex-col">
                       <p className="text-base font-medium ">{transaction.description}</p>
                       <p className="text-sm text-gray-500">{formatDate(transaction.date)}</p>
                     </div>
                   </div>
-                  <div className={`py-1 px-4 ${colors.bg} rounded-full`}>
-                    <p className={`text-sm font-medium ${colors.text}`}>
+                  <div className={`py-1 px-4 ${bgColorClass} rounded-full`}>
+                    <p className={`text-sm font-medium ${textColorClass}`}>
                       {transaction.category}
                     </p>
                   </div>
