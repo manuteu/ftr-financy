@@ -6,6 +6,45 @@
 
 @theme inline {
   --font-sans: "Inter", sans-serif;
+  --text-3xl: 1.75rem; /* 28px */
+  /* Financy - Brand & Grayscale (para uso com bg-brand-base, text-gray-600, etc) */
+  --color-brand-dark: var(--brand-dark);
+  --color-brand-base: var(--brand-base);
+  --color-gray-800: var(--gray-800);
+  --color-gray-700: var(--gray-700);
+  --color-gray-600: var(--gray-600);
+  --color-gray-500: var(--gray-500);
+  --color-gray-400: var(--gray-400);
+  --color-gray-300: var(--gray-300);
+  --color-gray-200: var(--gray-200);
+  --color-gray-100: var(--gray-100);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  /* Cores para categorias */
+  --color-green-light: var(--green-light);
+  --color-green-base: var(--green-base);
+  --color-green-dark: var(--green-dark);
+  --color-blue-light: var(--blue-light);
+  --color-blue-base: var(--blue-base);
+  --color-blue-dark: var(--blue-dark);
+  --color-purple-light: var(--purple-light);
+  --color-purple-base: var(--purple-base);
+  --color-purple-dark: var(--purple-dark);
+  --color-pink-light: var(--pink-light);
+  --color-pink-base: var(--pink-base);
+  --color-pink-dark: var(--pink-dark);
+  --color-red-light: var(--red-light);
+  --color-red-base: var(--red-base);
+  --color-red-dark: var(--red-dark);
+  --color-yellow-light: var(--yellow-light);
+  --color-yellow-base: var(--yellow-base);
+  --color-yellow-dark: var(--yellow-dark);
+  --color-orange-light: var(--orange-light);
+  --color-orange-base: var(--orange-base);
+  --color-orange-dark: var(--orange-dark);
+  --color-teal-light: var(--teal-light);
+  --color-teal-base: var(--teal-base);
+  --color-teal-dark: var(--teal-dark);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -47,72 +86,87 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
+  /* Financy Style Guide - Brand */
+  --brand-dark: #124b2b;
+  --brand-base: #1f6f43;
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Financy Style Guide - Grayscale */
+  --gray-800: #111827;
+  --gray-700: #374151;
+  --gray-600: #4b5563;
+  --gray-500: #6b7280;
+  --gray-400: #9ca3af;
+  --gray-300: #d1d5db;
+  --gray-200: #e5e7eb;
+  --gray-100: #f8f9fa;
+
+  /* Financy Style Guide - Neutral */
+  --neutral-black: #000000;
+  --neutral-white: #ffffff;
+
+  /* Financy Style Guide - Feedback */
+  --danger: #ef4444;
+  --success: #19ad70;
+
+  /* Financy Style Guide - Cores para categorias (light/base/dark) */
+  --green-light: #e0fae9;
+  --green-base: #16a34a;
+  --green-dark: #15803d;
+  --blue-light: #dbeafe;
+  --blue-base: #2563eb;
+  --blue-dark: #1d4ed8;
+  --purple-light: #f3e8ff;
+  --purple-base: #9333ea;
+  --purple-dark: #7e22ce;
+  --pink-light: #fce7f3;
+  --pink-base: #db2777;
+  --pink-dark: #be185d;
+  --red-light: #fee2e2;
+  --red-base: #dc2626;
+  --red-dark: #b91c1c;
+  --yellow-light: #f7f3ca;
+  --yellow-base: #ca8a04;
+  --yellow-dark: #a16207;
+  --orange-light: #ffedd5;
+  --orange-base: #ea580c;
+  --orange-dark: #c2410c;
+  --teal-light: #e0fae9;
+  --teal-base: #16a34a;
+  --teal-dark: #15803d;
+
+  /* shadcn tokens (mapeados do Financy) */
+  --radius: 0.625rem;
+  --background: #ffffff;
+  --foreground: #374151;
+  --card: #ffffff;
+  --card-foreground: #121214;
+  --popover: #ffffff;
+  --popover-foreground: #121214;
+  --primary: #1f6f43;
+  --primary-foreground: #ffffff;
+  --secondary: #f8f9fa;
+  --secondary-foreground: #111827;
+  --muted: #f8f9fa;
+  --muted-foreground: #6b7280;
+  --accent: #f8f9fa;
+  --accent-foreground: #111827;
+  --destructive: #ef4444;
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #1f6f43;
+  --chart-1: #1f6f43;
+  --chart-2: #19ad70;
+  --chart-3: #2563eb;
+  --chart-4: #ea580c;
+  --chart-5: #9333ea;
+  --sidebar: #f8f9fa;
+  --sidebar-foreground: #111827;
+  --sidebar-primary: #1f6f43;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f8f9fa;
+  --sidebar-accent-foreground: #111827;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #1f6f43;
 }
 
 @layer base {

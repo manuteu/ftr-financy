@@ -22,44 +22,44 @@ export const CATEGORY_COLORS: Record<
   { bg: string; text: string; icon: string }
 > = {
   green: {
-    bg: "bg-green-100 dark:bg-green-900/30",
-    text: "text-green-800 dark:text-green-400",
-    icon: "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400",
+    bg: "bg-green-light",
+    text: "text-green-dark",
+    icon: "bg-green-light text-green-base",
   },
   blue: {
-    bg: "bg-blue-100 dark:bg-blue-900/30",
-    text: "text-blue-800 dark:text-blue-400",
-    icon: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400",
+    bg: "bg-blue-light",
+    text: "text-blue-dark",
+    icon: "bg-blue-light text-blue-base",
   },
   purple: {
-    bg: "bg-purple-100 dark:bg-purple-900/30",
-    text: "text-purple-800 dark:text-purple-400",
-    icon: "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400",
+    bg: "bg-purple-light",
+    text: "text-purple-dark",
+    icon: "bg-purple-light text-purple-base",
   },
   pink: {
-    bg: "bg-pink-100 dark:bg-pink-900/30",
-    text: "text-pink-800 dark:text-pink-400",
-    icon: "bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400",
+    bg: "bg-pink-light",
+    text: "text-pink-dark",
+    icon: "bg-pink-light text-pink-base",
   },
   red: {
-    bg: "bg-red-100 dark:bg-red-900/30",
-    text: "text-red-800 dark:text-red-400",
-    icon: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400",
+    bg: "bg-red-light",
+    text: "text-red-dark",
+    icon: "bg-red-light text-red-base",
   },
   yellow: {
-    bg: "bg-yellow-100 dark:bg-yellow-900/30",
-    text: "text-yellow-800 dark:text-yellow-400",
-    icon: "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400",
+    bg: "bg-yellow-light",
+    text: "text-yellow-dark",
+    icon: "bg-yellow-light text-yellow-base",
   },
   orange: {
-    bg: "bg-orange-100 dark:bg-orange-900/30",
-    text: "text-orange-800 dark:text-orange-400",
-    icon: "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400",
+    bg: "bg-orange-light",
+    text: "text-orange-dark",
+    icon: "bg-orange-light text-orange-base",
   },
   teal: {
-    bg: "bg-teal-100 dark:bg-teal-900/30",
-    text: "text-teal-800 dark:text-teal-400",
-    icon: "bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400",
+    bg: "bg-teal-light",
+    text: "text-teal-dark",
+    icon: "bg-teal-light text-teal-base",
   },
 };
 

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { format } from "date-fns"
@@ -12,7 +12,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -29,20 +28,23 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
+import { formatCentsToDisplay, parseDisplayToCents } from "@/utils/formatters"
 import { CREATE_TRANSACTION } from "@/lib/graphql/mutations/CreateTransaction"
+import { UPDATE_TRANSACTION } from "@/lib/graphql/mutations/UpdateTransaction"
 import { GET_CATEGORIES } from "@/lib/graphql/queries/Categories"
 import { GET_DASHBOARD } from "@/lib/graphql/queries/Dashboard"
 import { GET_TRANSACTIONS } from "@/lib/graphql/queries/Transactions"
+import type { Transaction } from "@/pages/transactions/types"
 
-const newTransactionSchema = z.object({
+const transactionSchema = z.object({
   type: z.enum(["income", "expense"]),
   description: z.string().min(1, "Descrição obrigatória"),
   date: z.date({ error: "Data obrigatória" }),
-  amount: z.number({ error: "Valor obrigatório" }).positive("O valor deve ser positivo"),
+  amount: z.number({ error: "Valor obrigatório" }).min(1, "O valor deve ser maior que zero"),
   categoryId: z.string().optional(),
 })
 
-type NewTransactionSchema = z.infer<typeof newTransactionSchema>
+type TransactionSchema = z.infer<typeof transactionSchema>
 
 type CategoryData = {
   id: string
@@ -57,10 +59,43 @@ type GetCategoriesData = {
 
 interface NewTransactionModalProps {
   trigger?: React.ReactNode
+  /** Transação a ser editada. Quando definida, o modal opera em modo edição. */
+  transaction?: Transaction | null
+  /** Controla abertura do modal (usado no modo edição). */
+  open?: boolean
+  /** Callback quando o modal abre/fecha (usado no modo edição). */
+  onOpenChange?: (open: boolean) => void
 }
 
-export function NewTransactionModal({ trigger }: NewTransactionModalProps) {
-  const [open, setOpen] = useState(false)
+const getDefaultFormValues = (): Partial<TransactionSchema> => ({
+  type: "expense",
+  description: "",
+  date: new Date(),
+  categoryId: undefined,
+})
+
+function transactionToFormValues(transaction: Transaction): TransactionSchema {
+  return {
+    type: transaction.type,
+    description: transaction.description,
+    date: new Date(transaction.date),
+    amount: transaction.value,
+    categoryId: transaction.categoryId ?? undefined,
+  }
+}
+
+export function NewTransactionModal({
+  trigger,
+  transaction,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+}: NewTransactionModalProps) {
+  const [internalOpen, setInternalOpen] = useState(false)
+
+  const isEditMode = !!transaction
+  const isControlled = controlledOpen !== undefined && controlledOnOpenChange !== undefined
+  const open = isControlled ? controlledOpen : internalOpen
+  const setOpen = isControlled ? controlledOnOpenChange : setInternalOpen
 
   const { data: categoriesData } = useQuery<GetCategoriesData>(GET_CATEGORIES, {
     skip: !open,
@@ -70,37 +105,63 @@ export function NewTransactionModal({ trigger }: NewTransactionModalProps) {
     refetchQueries: [{ query: GET_DASHBOARD }, { query: GET_TRANSACTIONS }],
   })
 
+  const [updateTransaction] = useMutation(UPDATE_TRANSACTION, {
+    refetchQueries: [{ query: GET_DASHBOARD }, { query: GET_TRANSACTIONS }],
+  })
+
   const {
     register,
     handleSubmit,
     control,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<NewTransactionSchema>({
-    resolver: zodResolver(newTransactionSchema),
-    defaultValues: {
-      type: "expense",
-      description: "",
-      categoryId: undefined,
-    },
+  } = useForm<TransactionSchema>({
+    resolver: zodResolver(transactionSchema),
+    defaultValues: getDefaultFormValues(),
   })
 
-  async function onSubmit(data: NewTransactionSchema) {
+  useEffect(() => {
+    if (open && transaction) {
+      reset(transactionToFormValues(transaction))
+    } else if (open && !transaction) {
+      reset(getDefaultFormValues())
+    } else if (!open) {
+      reset(getDefaultFormValues())
+    }
+  }, [open, transaction, reset])
+
+  async function onSubmit(data: TransactionSchema) {
     try {
-      await createTransaction({
-        variables: {
-          description: data.description,
-          amount: data.amount,
-          type: data.type,
-          date: data.date,
-          categoryId: data.categoryId ?? null,
-        },
-      })
-      toast.success("Transação criada com sucesso!")
+      if (isEditMode && transaction) {
+        await updateTransaction({
+          variables: {
+            id: transaction.id,
+            description: data.description,
+            amount: data.amount,
+            type: data.type,
+            date: data.date,
+            categoryId: data.categoryId ?? null,
+          },
+        })
+        toast.success("Transação atualizada com sucesso!")
+      } else {
+        await createTransaction({
+          variables: {
+            description: data.description,
+            amount: data.amount,
+            type: data.type,
+            date: data.date,
+            categoryId: data.categoryId ?? null,
+          },
+        })
+        toast.success("Transação criada com sucesso!")
+      }
       reset()
       setOpen(false)
     } catch {
-      toast.error("Erro ao criar transação. Tente novamente.")
+      toast.error(
+        isEditMode ? "Erro ao atualizar transação. Tente novamente." : "Erro ao criar transação. Tente novamente."
+      )
     }
   }
 
@@ -111,21 +172,27 @@ export function NewTransactionModal({ trigger }: NewTransactionModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        {trigger ?? (
-          <Button variant="ghost" className="text-green-800 w-full">
-            <Plus size={16} />
-            Nova transação
-          </Button>
-        )}
-      </DialogTrigger>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          {trigger ?? (
+            <Button variant="ghost" className="text-primary w-full">
+              <Plus size={16} />
+              Nova transação
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
 
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Nova transação</DialogTitle>
-          <DialogDescription>
-            Registre uma nova receita ou despesa na sua conta.
-          </DialogDescription>
+      <DialogContent className="sm:max-w-md gap-6 p-6 border-border rounded-xl">
+        <DialogHeader className="flex flex-row items-start justify-between gap-4 text-left">
+          <div className="flex flex-col gap-0.5">
+            <DialogTitle className="text-base font-semibold text-foreground leading-6">
+              {isEditMode ? "Editar transação" : "Nova transação"}
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground leading-5">
+              {isEditMode ? "Atualize os dados da transação" : "Registre sua despesa ou receita"}
+            </DialogDescription>
+          </div>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -133,42 +200,44 @@ export function NewTransactionModal({ trigger }: NewTransactionModalProps) {
             name="type"
             control={control}
             render={({ field }) => (
-              <div className="grid grid-cols-2 gap-1 rounded-lg border p-1">
-                <button
-                  type="button"
-                  onClick={() => field.onChange("income")}
-                  className={cn(
-                    "flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors",
-                    field.value === "income"
-                      ? "bg-green-100 text-green-700"
-                      : "text-muted-foreground hover:bg-muted"
-                  )}
-                >
-                  <CircleArrowUp size={16} />
-                  Receita
-                </button>
+              <div className="flex gap-2 rounded-xl border border-border p-2">
                 <button
                   type="button"
                   onClick={() => field.onChange("expense")}
                   className={cn(
-                    "flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors",
+                    "flex flex-1 items-center justify-center gap-3 rounded-lg py-2.5 text-base font-medium transition-colors",
                     field.value === "expense"
-                      ? "bg-red-100 text-red-700"
+                      ? "bg-gray-100 border-2 border-destructive text-foreground"
                       : "text-muted-foreground hover:bg-muted"
                   )}
                 >
-                  <CircleArrowDown size={16} />
+                  <CircleArrowDown size={16} className={field.value === "expense" ? "text-destructive" : ""} />
                   Despesa
+                </button>
+                <button
+                  type="button"
+                  onClick={() => field.onChange("income")}
+                  className={cn(
+                    "flex flex-1 items-center justify-center gap-3 rounded-lg py-2.5 text-base font-medium transition-colors",
+                    field.value === "income"
+                      ? "bg-gray-100 border-2 border-primary text-foreground"
+                      : "text-muted-foreground hover:bg-muted"
+                  )}
+                >
+                  <CircleArrowUp size={16} className={field.value === "income" ? "text-primary" : ""} />
+                  Receita
                 </button>
               </div>
             )}
           />
 
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="description">Descrição</Label>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="description" className="text-sm font-medium text-foreground">
+              Descrição
+            </Label>
             <Input
               id="description"
-              placeholder="Ex: Almoço no restaurante"
+              placeholder="Ex. Almoço no restaurante"
               aria-invalid={!!errors.description}
               {...register("description")}
             />
@@ -177,69 +246,88 @@ export function NewTransactionModal({ trigger }: NewTransactionModalProps) {
             )}
           </div>
 
-          <div className="flex flex-col gap-1">
-            <Label>Data</Label>
-            <Controller
-              name="date"
-              control={control}
-              render={({ field }) => (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 size-4" />
-                      {field.value
-                        ? format(field.value, "dd/MM/yyyy")
-                        : "Selecione uma data"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+          <div className="flex gap-4">
+            <div className="flex flex-1 flex-col gap-2">
+              <Label className="text-sm font-medium text-foreground">Data</Label>
+              <Controller
+                name="date"
+                control={control}
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal rounded-lg h-12",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 size-4" />
+                        {field.value
+                          ? format(field.value, "dd/MM/yyyy")
+                          : "Selecione"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+              {errors.date && (
+                <span className="text-sm text-destructive">{errors.date.message}</span>
               )}
-            />
-            {errors.date && (
-              <span className="text-sm text-destructive">{errors.date.message}</span>
-            )}
+            </div>
+            <div className="flex flex-1 flex-col gap-2">
+              <Label htmlFor="amount" className="text-sm font-medium text-foreground">
+                Valor
+              </Label>
+              <div className="relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground text-base">
+                  R$
+                </span>
+                <Controller
+                  name="amount"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      id="amount"
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="0,00"
+                      className="rounded-lg pl-10 text-base"
+                      aria-invalid={!!errors.amount}
+                      value={field.value ? formatCentsToDisplay(field.value) : ""}
+                      onChange={(e) => {
+                        const cents = parseDisplayToCents(e.target.value)
+                        field.onChange(cents)
+                      }}
+                      onBlur={field.onBlur}
+                    />
+                  )}
+                />
+              </div>
+              {errors.amount && (
+                <span className="text-sm text-destructive">{errors.amount.message}</span>
+              )}
+            </div>
           </div>
 
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="amount">Valor (R$)</Label>
-            <Input
-              id="amount"
-              type="number"
-              step="0.01"
-              min="0"
-              placeholder="0,00"
-              aria-invalid={!!errors.amount}
-              {...register("amount", { valueAsNumber: true })}
-            />
-            {errors.amount && (
-              <span className="text-sm text-destructive">{errors.amount.message}</span>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <Label>Categoria</Label>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm font-medium text-foreground">Categoria</Label>
             <Controller
               name="categoryId"
               control={control}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecione uma categoria (opcional)" />
+                  <SelectTrigger className="w-full rounded-lg h-auto py-3.5 px-3.5">
+                    <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
                     {categoriesData?.categories.map((cat) => (
@@ -253,11 +341,9 @@ export function NewTransactionModal({ trigger }: NewTransactionModalProps) {
             />
           </div>
 
-          <DialogFooter>
-            <Button type="submit" className="w-full" isLoading={isSubmitting}>
-              Salvar transação
-            </Button>
-          </DialogFooter>
+          <Button type="submit" size="lg" className="w-full rounded-lg text-base font-medium mt-2" isLoading={isSubmitting}>
+            Salvar
+          </Button>
         </form>
       </DialogContent>
     </Dialog>

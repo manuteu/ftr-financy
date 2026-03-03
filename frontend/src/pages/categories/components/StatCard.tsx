@@ -9,14 +9,16 @@ interface StatCardProps {
 export function StatCard({ icon, title, value }: StatCardProps) {
   return (
     <Card>
-      <CardContent className="flex flex-col gap-2 py-4">
-        <div className="flex items-center gap-2">
+      <CardContent className="flex flex-row items-start gap-4 py-6">
+        <div className="mt-1">
           {icon}
+        </div>
+        <div className="flex flex-col gap-2">
+          <p className="text-3xl font-bold text-gray-800">{value}</p>
           <p className="text-xs font-medium uppercase text-muted-foreground">
             {title}
           </p>
         </div>
-        <p className="text-2xl font-bold text-foreground">{value}</p>
       </CardContent>
     </Card>
   );

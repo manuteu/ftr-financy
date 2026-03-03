@@ -2,18 +2,20 @@ import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Layers, Receipt, TrendingUp } from "lucide-react";
+import { Plus, Tag, ArrowUpDown, Utensils } from "lucide-react";
 import { StatCard, CategoryCard, DeleteCategoryModal } from "./components";
 import { useCategories } from "./hooks/useCategories";
 import { NewCategoryModal } from "@/components/new-category-modal";
+import { EditCategoryModal } from "@/components/edit-category-modal";
 import type { Category } from "./types";
 
 export default function Categories() {
   const { categories, stats, loading } = useCategories();
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
+  const [categoryToEdit, setCategoryToEdit] = useState<Category | null>(null);
 
-  function handleEdit(_category: Category) {
-    // TODO: abrir modal de edição
+  function handleEdit(category: Category) {
+    setCategoryToEdit(category);
   }
 
   function handleDelete(category: Category) {
@@ -21,10 +23,10 @@ export default function Categories() {
   }
 
   return (
-    <main className="space-y-6 p-6">
+    <main className="space-y-8">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Categorias</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-800">Categorias</h1>
           <p className="text-muted-foreground">
             Organize suas receitas e despesas por categoria.
           </p>
@@ -39,7 +41,7 @@ export default function Categories() {
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-3">
         {loading ? (
           Array.from({ length: 3 }).map((_, i) => (
             <Card key={i}>
@@ -52,17 +54,17 @@ export default function Categories() {
         ) : (
           <>
             <StatCard
-              icon={<Layers className="size-5 text-muted-foreground" />}
+              icon={<Tag className="size-6 text-foreground" />}
               title="Total de categorias"
               value={stats.totalCategories}
             />
             <StatCard
-              icon={<Receipt className="size-5 text-muted-foreground" />}
+              icon={<ArrowUpDown className="size-6 text-chart-5" />}
               title="Total de transações"
               value={stats.totalTransactions}
             />
             <StatCard
-              icon={<TrendingUp className="size-5 text-muted-foreground" />}
+              icon={<Utensils className="size-6 text-chart-3" />}
               title="Categoria mais utilizada"
               value={stats.mostUsedCategory?.name ?? "—"}
             />
@@ -100,6 +102,11 @@ export default function Categories() {
         category={categoryToDelete}
         open={!!categoryToDelete}
         onOpenChange={(open) => { if (!open) setCategoryToDelete(null) }}
+      />
+      <EditCategoryModal
+        category={categoryToEdit}
+        open={!!categoryToEdit}
+        onOpenChange={(open) => { if (!open) setCategoryToEdit(null) }}
       />
     </main>
   );

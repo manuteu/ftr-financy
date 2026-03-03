@@ -1,5 +1,5 @@
 import { NavLink } from "react-router"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,11 +7,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import Logo from '@/assets/logo.svg'
+import { useAuthStore } from "@/stores/auth";
+import { useNavigate } from "react-router";
 
 export function Header() {
+  const { user, getInitials, logout } = useAuthStore();
+  const navigate = useNavigate();
+
   return (
     <header className="w-full border-b bg-background">
-      <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+      <div className="relative mx-auto flex h-16 items-center justify-between px-12">
 
         <div className="flex items-center">
           <NavLink
@@ -23,7 +28,7 @@ export function Header() {
         </div>
 
         <nav className="absolute left-1/2 -translate-x-1/2">
-          <ul className="flex items-center gap-8 text-sm font-medium">
+          <ul className="flex items-center gap-5 text-sm font-medium">
 
             <li>
               <NavLink
@@ -73,9 +78,11 @@ export function Header() {
         <div className="flex items-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Avatar className="cursor-pointer">
-                <AvatarImage src="https://github.com/shadcn.png" />
-                <AvatarFallback>ML</AvatarFallback>
+              <Avatar className="cursor-pointer size-9">
+                <AvatarImage src="xxx" />
+                <div className="bg-gray-300 size-9 text-gray-800 text-sm font-medium flex items-center justify-center">
+                  {getInitials(user?.name ?? "")}
+                </div>
               </Avatar>
             </DropdownMenuTrigger>
 
@@ -83,7 +90,13 @@ export function Header() {
               <DropdownMenuItem asChild>
                 <NavLink to="/profile">Perfil</NavLink>
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-red-500">
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => {
+                  logout();
+                  navigate("/");
+                }}
+              >
                 Sair
               </DropdownMenuItem>
             </DropdownMenuContent>

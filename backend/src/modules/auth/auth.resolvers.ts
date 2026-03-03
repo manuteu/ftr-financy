@@ -14,6 +14,7 @@ export const authResolvers = {
         select: {
           id: true,
           email: true,
+          name: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -97,6 +98,30 @@ export const authResolvers = {
           updatedAt: user.updatedAt,
         },
       };
+    },
+
+    updateProfile: async (
+      _: unknown,
+      { name }: { name: string },
+      context: GraphQLContext
+    ) => {
+      if (!context.userId) {
+        throw new Error('Não autenticado');
+      }
+
+      const user = await context.prisma.user.update({
+        where: { id: context.userId },
+        data: { name },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      return user;
     },
   },
 };

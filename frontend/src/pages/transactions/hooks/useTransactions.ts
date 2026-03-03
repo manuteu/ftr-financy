@@ -57,8 +57,12 @@ export function useTransactions() {
     description: filters.description || undefined,
     type: filters.type || undefined,
     categoryId: filters.categoryId || undefined,
-    startDate: filters.period ? startOfMonth(filters.period) : undefined,
-    endDate: filters.period ? endOfMonth(filters.period) : undefined,
+    startDate: filters.period
+      ? startOfMonth(filters.period).toISOString()
+      : undefined,
+    endDate: filters.period
+      ? endOfMonth(filters.period).toISOString()
+      : undefined,
     page,
     pageSize: PAGE_SIZE,
   }), [filters, page]);

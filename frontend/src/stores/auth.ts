@@ -4,6 +4,7 @@ import { apolloClient } from "@/lib/graphql/apollo"
 import type { User, SignUpInput, SignInInput } from '@/types'
 import { SIGN_UP } from '@/lib/graphql/mutations/SignUp'
 import { SIGN_IN } from '@/lib/graphql/mutations/SignIn'
+import { UPDATE_PROFILE } from '@/lib/graphql/mutations/UpdateProfile'
 import storage from "@/storage"
 
 type SignUpMutationData = {
@@ -20,13 +21,19 @@ type SignInMutationData = {
   }
 }
 
+type UpdateProfileMutationData = {
+  updateProfile: User
+}
+
 interface AuthState {
   user: User | null
   token: string | null
   isAuthenticated: boolean
   signUp: (data: SignUpInput) => Promise<boolean>
   signIn: (data: SignInInput) => Promise<boolean>
-  logout: () => void
+  updateProfile: (name: string) => Promise<boolean>
+  logout: () => void;
+  getInitials: (name: string) => string;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -35,6 +42,14 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isAuthenticated: false,
+      getInitials: (name: string) => {
+        return name
+          .split(" ")
+          .map((n) => n[0])
+          .slice(0, 2)
+          .join("")
+          .toUpperCase();
+      },
       signIn: async (signInData: SignInInput) => {
         try {
           const { data } = await apolloClient.mutate<SignInMutationData, SignInInput>({
@@ -62,7 +77,7 @@ export const useAuthStore = create<AuthState>()(
           }
           return false
         } catch (error) {
-          console.log("Erro ao fazer o sign in")
+          console.log("Erro ao fazer o sign in", error)
           throw error
         }
       },
@@ -99,6 +114,26 @@ export const useAuthStore = create<AuthState>()(
           return false
         } catch (error) {
           console.log("Erro ao fazer o cadastro")
+          throw error
+        }
+      },
+      updateProfile: async (name: string) => {
+        try {
+          const { data } = await apolloClient.mutate<
+            UpdateProfileMutationData,
+            { name: string }
+          >({
+            mutation: UPDATE_PROFILE,
+            variables: { name },
+          })
+
+          if (data?.updateProfile) {
+            set({ user: data.updateProfile })
+            return true
+          }
+          return false
+        } catch (error) {
+          console.log("Erro ao atualizar perfil")
           throw error
         }
       },

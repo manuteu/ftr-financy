@@ -47,32 +47,34 @@ export function DeleteCategoryModal({
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <div className="flex size-11 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/30 mb-1">
-              <TriangleAlert className="size-5 text-yellow-600 dark:text-yellow-400" />
-            </div>
-            <DialogTitle>Não é possível excluir</DialogTitle>
-            <DialogDescription asChild>
-              <div className="space-y-2 text-sm text-muted-foreground">
-                <p>
-                  A categoria{" "}
-                  <span className="font-semibold text-foreground">
-                    "{category?.name}"
-                  </span>{" "}
-                  possui{" "}
-                  <span className="font-semibold text-foreground">
-                    {category?.transactionCount}{" "}
-                    {category?.transactionCount === 1 ? "transação vinculada" : "transações vinculadas"}
-                  </span>
-                  .
-                </p>
-                <p>
-                  Para excluí-la, primeiro remova ou altere a categoria de todas
-                  as transações associadas.
-                </p>
+          <DialogHeader className="flex flex-row items-start justify-between gap-4 text-left">
+            <div className="flex flex-col gap-2">
+              <div className="flex size-11 items-center justify-center rounded-full bg-yellow-light mb-1">
+                <TriangleAlert className="size-5 text-yellow-dark" />
               </div>
-            </DialogDescription>
+              <DialogTitle>Não é possível excluir</DialogTitle>
+            </div>
           </DialogHeader>
+          <DialogDescription asChild className="my-4">
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <p>
+                A categoria{" "}
+                <span className="font-semibold text-foreground">
+                  "{category?.name}"
+                </span>{" "}
+                possui{" "}
+                <span className="font-semibold text-foreground">
+                  {category?.transactionCount}{" "}
+                  {category?.transactionCount === 1 ? "transação vinculada" : "transações vinculadas"}
+                </span>
+                .
+              </p>
+              <p>
+                Para excluí-la, primeiro remova ou altere a categoria de todas
+                as transações associadas.
+              </p>
+            </div>
+          </DialogDescription>
 
           <DialogFooter>
             <Button
@@ -91,19 +93,22 @@ export function DeleteCategoryModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
-        <DialogHeader>
-          <div className="flex size-11 items-center justify-center rounded-full bg-destructive/10 mb-1">
-            <Trash2 className="size-5 text-destructive" />
+        <DialogHeader className="flex flex-row items-start justify-between gap-4 text-left">
+          <div className="flex flex-col gap-2">
+            <div className="flex size-11 items-center justify-center rounded-full bg-destructive/10 mb-1">
+              <Trash2 className="size-5 text-destructive" />
+            </div>
+            <DialogTitle>Excluir categoria</DialogTitle>
           </div>
-          <DialogTitle>Excluir categoria</DialogTitle>
-          <DialogDescription>
-            Tem certeza que deseja excluir a categoria{" "}
-            <span className="font-semibold text-foreground">
-              "{category?.name}"
-            </span>
-            ? Esta ação não pode ser desfeita.
-          </DialogDescription>
         </DialogHeader>
+
+        <DialogDescription className="my-4">
+          Tem certeza que deseja excluir a categoria{" "}
+          <span className="font-semibold text-foreground">
+            "{category?.name}"
+          </span>
+          ? Esta ação não pode ser desfeita.
+        </DialogDescription>
 
         <DialogFooter className="gap-2 sm:gap-2">
           <Button

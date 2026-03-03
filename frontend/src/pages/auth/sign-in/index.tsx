@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signInSchema, type ISignInSchema } from "./schemas";
 import { Mail, Lock } from "lucide-react";
@@ -11,32 +11,54 @@ import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router'
 import Logo from '@/assets/logo.svg'
 import { useAuthStore } from "@/stores/auth";
+import { toast } from "sonner";
+import { getGraphQLErrorMessage } from "@/utils/graphql-errors";
+import storage from "@/storage";
+
+function getRememberMeEmail(): string {
+  return localStorage.getItem(storage.REMEMBER_ME_EMAIL) ?? "";
+}
 
 export default function SignIn() {
   const authStoreInstance = useAuthStore();
   const navigate = useNavigate();
+  const savedEmail = getRememberMeEmail();
 
   const {
     register,
+    control,
     handleSubmit,
     formState:
     { errors, isSubmitting }, reset } = useForm<ISignInSchema>({
       resolver: zodResolver(signInSchema),
-      defaultValues: { email: "", password: "" },
+      defaultValues: {
+        email: savedEmail,
+        password: "",
+        rememberMe: !!savedEmail,
+      },
       mode: "onSubmit",
       reValidateMode: "onChange",
     });
 
   async function onSubmit(data: ISignInSchema) {
-    const result = await authStoreInstance.signIn(data);
-    if (!result) return;
-    reset();
+    try {
+      const result = await authStoreInstance.signIn(data);
+      if (!result) return;
+      if (data.rememberMe) {
+        localStorage.setItem(storage.REMEMBER_ME_EMAIL, data.email);
+      } else {
+        localStorage.removeItem(storage.REMEMBER_ME_EMAIL);
+      }
+      reset();
+    } catch (error) {
+      toast.error(getGraphQLErrorMessage(error));
+    }
   }
 
   return (
     <div className=" w-full max-w-md mx-auto">
       <img src={Logo} className="w-33 mx-auto" />
-      <Card className="p-8 xl:gap-6 gap-2 m-4 bg-white">
+      <Card className="p-8 xl:gap-6 gap-2 m-4 bg-card">
         <div className="flex flex-col items-center mb-5">
           <h1 className="text-xl font-bold">Fazer login</h1>
           <p>Entre na sua conta para continuar</p>
@@ -80,23 +102,33 @@ export default function SignIn() {
           </div>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <Checkbox id="remember-checkbox" />
-              <Label htmlFor="remember-checkbox">Lembrar-me</Label>
+              <Controller
+                name="rememberMe"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    id="rememberMe"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+              <Label htmlFor="rememberMe">Lembrar-me</Label>
             </div>
-            <p>Recuperar senha</p>
+            <p className="text-sm text-primary">Recuperar senha</p>
           </div>
-          <Button type="submit" className="uppercase mt-2" isLoading={isSubmitting}>
+          <Button type="submit" size="lg" className="mb-1 text-base" isLoading={isSubmitting}>
             Entrar
           </Button>
 
           <div className="flex items-center gap-3">
             <Separator />
-            <p>ou</p>
+            <p className="text-sm text-muted-foreground">ou</p>
             <Separator />
           </div>
 
-          <p className="text-center">Ainda não tem uma conta?</p>
-          <Button type="submit" className="uppercase mt-2" isLoading={isSubmitting} onClick={() => navigate('/signup')}>
+          <p className="text-center mt-1">Ainda não tem uma conta?</p>
+          <Button type="button" size="lg" className="text-base" onClick={() => navigate('/signup')}>
             Criar conta
           </Button>
         </form>

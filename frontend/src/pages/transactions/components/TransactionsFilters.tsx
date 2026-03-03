@@ -8,7 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
@@ -17,10 +16,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { formatMonthYear } from "@/utils/formatters";
 import { CalendarIcon, X } from "lucide-react";
-import { startOfMonth } from "date-fns";
 import { cn } from "@/lib/utils";
 import type { TransactionFilters as Filters, TransactionType } from "../types";
 import { TRANSACTION_TYPES } from "../types";
+
+const MONTHS = [
+  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+] as const;
+
+const CURRENT_YEAR = new Date().getFullYear();
+const YEARS = Array.from({ length: 11 }, (_, i) => CURRENT_YEAR - 5 + i);
 
 interface TransactionsFiltersProps {
   filters: Filters;
@@ -112,7 +118,7 @@ export function TransactionsFilters({
                   variant="outline"
                   size="lg"
                   className={cn(
-                    "w-full justify-start text-left font-normal",
+                    "w-full justify-start text-left font-normal text-base",
                     !filters.period && "text-muted-foreground"
                   )}
                 >
@@ -120,16 +126,67 @@ export function TransactionsFilters({
                   {periodDisplay}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={filters.period ?? undefined}
-                  onSelect={(date) =>
-                    onPeriodChange(date ? startOfMonth(date) : null)
-                  }
-                  defaultMonth={filters.period ?? new Date()}
-                  captionLayout="dropdown"
-                />
+              <PopoverContent className="w-auto" align="start">
+                <div className="flex gap-2">
+                  <Select
+                    value={
+                      filters.period !== null
+                        ? String(filters.period.getMonth())
+                        : "all"
+                    }
+                    onValueChange={(v) => {
+                      if (v === "all") {
+                        onPeriodChange(null);
+                        return;
+                      }
+                      const month = parseInt(v, 10);
+                      const year =
+                        filters.period?.getFullYear() ?? new Date().getFullYear();
+                      onPeriodChange(new Date(year, month, 1));
+                    }}
+                  >
+                    <SelectTrigger className="min-w-[130px] text-sm">
+                      <SelectValue placeholder="Mês" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      {MONTHS.map((name, i) => (
+                        <SelectItem key={i} value={String(i)}>
+                          {name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={
+                      filters.period !== null
+                        ? String(filters.period.getFullYear())
+                        : "all"
+                    }
+                    onValueChange={(v) => {
+                      if (v === "all") {
+                        onPeriodChange(null);
+                        return;
+                      }
+                      const year = parseInt(v, 10);
+                      const month =
+                        filters.period?.getMonth() ?? new Date().getMonth();
+                      onPeriodChange(new Date(year, month, 1));
+                    }}
+                  >
+                    <SelectTrigger className="min-w-[100px] text-sm">
+                      <SelectValue placeholder="Ano" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      {YEARS.map((y) => (
+                        <SelectItem key={y} value={String(y)}>
+                          {y}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </PopoverContent>
             </Popover>
           </div>

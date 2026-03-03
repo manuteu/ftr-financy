@@ -1,10 +1,16 @@
+import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NewTransactionModal } from "@/components/new-transaction-modal";
-import { TransactionsFilters, TransactionsTable } from "./components";
+import { DeleteTransactionModal, TransactionsFilters, TransactionsTable } from "./components";
 import { useTransactions } from "./hooks/useTransactions";
+import type { Transaction } from "./types";
 
 export default function Transactions() {
+  const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null);
+  const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
   const {
     filters,
     availableCategories,
@@ -20,32 +26,54 @@ export default function Transactions() {
     loading,
   } = useTransactions();
 
-  function handleEdit() {
-    // TODO: abrir modal de edição
+  function handleEdit(transaction: Transaction) {
+    setTransactionToEdit(transaction);
+    setModalOpen(true);
   }
 
-  function handleDelete() {
-    // TODO: confirmar e chamar API
+  function handleDelete(transaction: Transaction) {
+    setTransactionToDelete(transaction);
+  }
+
+  function handleModalOpenChange(open: boolean) {
+    setModalOpen(open);
+    if (!open) setTransactionToEdit(null);
   }
 
   return (
-    <main className="space-y-6 p-6">
+    <main className="space-y-6">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Transações</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-800">Transações</h1>
           <p className="text-muted-foreground">
             Gerencie todas as suas transações financeiras.
           </p>
         </div>
-        <NewTransactionModal
-          trigger={
-            <Button className="w-fit">
-              <Plus className="size-4" />
-              Nova transação
-            </Button>
-          }
-        />
+        <Button
+          className="w-fit"
+          onClick={() => {
+            setTransactionToEdit(null);
+            setModalOpen(true);
+          }}
+        >
+          <Plus className="size-4" />
+          Nova transação
+        </Button>
       </div>
+
+      <NewTransactionModal
+        transaction={transactionToEdit}
+        open={modalOpen}
+        onOpenChange={handleModalOpenChange}
+      />
+
+      <DeleteTransactionModal
+        transaction={transactionToDelete}
+        open={!!transactionToDelete}
+        onOpenChange={(open) => {
+          if (!open) setTransactionToDelete(null);
+        }}
+      />
 
       <TransactionsFilters
         filters={filters}

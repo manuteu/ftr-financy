@@ -20,6 +20,7 @@ import { formatCurrency, formatDate } from "@/utils/formatters";
 import { SquarePen, Trash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Transaction } from "../types";
+import { getCategoryColors } from "@/pages/categories/types";
 import { DynamicIcon, type IconName } from "lucide-react/dynamic";
 
 const PAGE_SIZE = 10;
@@ -77,74 +78,78 @@ export function TransactionsTable({
                 </TableCell>
               </TableRow>
             ) : (
-              transactions.map((transaction) => (
-                <TableRow key={transaction.id}>
-                  <TableCell className="font-medium flex items-center gap-4">
-                    <div className={cn(`size-10 shrink-0 flex items-center justify-center rounded-lg bg-${transaction.category.color}-100`)}>
-                      <DynamicIcon
-                        name={transaction.category.icon as IconName}
-                        className={cn(`text-${transaction.category.color}-800`)}
-                        size={16}
-                      />
-                    </div>
-                    <p className="text-base font-medium">{transaction.description}</p>
-                  </TableCell>
-                  <TableCell className="text-center">{formatDate(transaction.date)}</TableCell>
-                  <TableCell className="text-center">
-                    <span className={cn(`px-3 py-1 bg-${transaction.category.color}-100 text-${transaction.category.color}-800 font-medium rounded-full`)}>
-                      {transaction.category.name}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <span
+              transactions.map((transaction) => {
+                const categoryColors = getCategoryColors(transaction.category.color);
+                return (
+                  <TableRow key={transaction.id}>
+                    <TableCell className="font-medium flex items-center gap-4">
+                      <div className={cn("size-10 shrink-0 flex items-center justify-center rounded-lg", categoryColors.bg)}>
+                        <DynamicIcon
+                          name={transaction.category.icon as IconName}
+                          className={cn(categoryColors.text)}
+                          size={16}
+                        />
+                      </div>
+                      <p className="text-base font-medium text-gray-800">{transaction.description}</p>
+                    </TableCell>
+                    <TableCell className="text-center">{formatDate(transaction.date)}</TableCell>
+                    <TableCell className="text-center">
+                      <span className={cn("px-3 py-1 font-medium rounded-full", categoryColors.bg, categoryColors.text)}>
+                        {transaction.category.name}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span
+                        className={cn(
+                          "px-2 py-0.5 text-sm font-medium flex items-center gap-2 justify-center",
+                          transaction.type === "income"
+                            ? "text-success"
+                            : "text-destructive"
+                        )}
+                      >
+                        <DynamicIcon
+                          name={transaction.type === "income" ? "circle-arrow-up" : "circle-arrow-down"}
+                          className={cn(transaction.type === "income" ? "text-success" : "text-destructive")}
+                          size={16}
+                        />
+                        {transaction.type === "income" ? "Entrada" : "Saída"}
+                      </span>
+                    </TableCell>
+                    <TableCell
                       className={cn(
-                        "px-2 py-0.5 text-sm font-medium flex items-center gap-2 justify-center",
-                        transaction.type === "income"
-                          ? "text-green-600"
-                          : "text-red-600"
+                        "text-right font-semibold text-gray-800",
                       )}
                     >
-                      <DynamicIcon
-                        name={transaction.type === "income" ? "circle-arrow-up" : "circle-arrow-down"}
-                        className={cn(transaction.type === "income" ? "text-green-600" : "text-red-600")}
-                        size={16}
-                      />
-                      {transaction.type === "income" ? "Entrada" : "Saída"}
-                    </span>
-                  </TableCell>
-                  <TableCell
-                    className={cn(
-                      "text-right font-semibold"
-                    )}
-                  >
-                    {transaction.type === 'income' ? '+' : '-'}
-                    <span className="ml-1">
-                      {formatCurrency(transaction.value)}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button
-                        variant="outline"
-                        size="icon-sm"
-                        aria-label="Excluir"
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => onDelete(transaction)}
-                      >
-                        <Trash className="size-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon-sm"
-                        aria-label="Editar"
-                        onClick={() => onEdit(transaction)}
-                      >
-                        <SquarePen className="size-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+                      {transaction.type === 'income' ? '+' : '-'}
+                      <span className="ml-1">
+                        {formatCurrency(transaction.value)}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon-sm"
+                          aria-label="Excluir"
+                          className="text-destructive hover:text-destructive shadow-none"
+                          onClick={() => onDelete(transaction)}
+                        >
+                          <Trash className="size-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon-sm"
+                          aria-label="Editar"
+                          className="shadow-none"
+                          onClick={() => onEdit(transaction)}
+                        >
+                          <SquarePen className="size-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>

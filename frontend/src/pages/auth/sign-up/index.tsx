@@ -10,6 +10,8 @@ import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router";
 import Logo from '@/assets/logo.svg'
 import { useAuthStore } from "@/stores/auth";
+import { toast } from "sonner";
+import { getGraphQLErrorMessage } from "@/utils/graphql-errors";
 
 export default function SignUp() {
   const authStoreInstance = useAuthStore();
@@ -27,16 +29,20 @@ export default function SignUp() {
     });
 
   async function onSubmit(data: ISignUpSchema) {
-    const result = await authStoreInstance.signUp(data);
-    if (!result) return;
-    reset();
-    // TODO redirect to home page
+    try {
+      const result = await authStoreInstance.signUp(data);
+      if (!result) return;
+      reset();
+      // TODO redirect to home page
+    } catch (error) {
+      toast.error(getGraphQLErrorMessage(error));
+    }
   }
 
   return (
     <div className=" w-full max-w-md mx-auto">
       <img src={Logo} className="w-33 mx-auto" />
-      <Card className="p-8 xl:gap-6 gap-2 m-4 bg-white">
+      <Card className="p-8 xl:gap-6 gap-2 m-4 bg-card">
         <div className="flex flex-col items-center mb-5">
           <h1 className="text-xl font-bold">Criar conta</h1>
           <p>Entre na sua conta para continuar</p>
@@ -98,7 +104,7 @@ export default function SignUp() {
           <div className="flex justify-between items-center">
             <p className="text-xs">A senha deve ter no mínimo 8 caractéres</p>
           </div>
-          <Button type="submit" className="uppercase mt-2" isLoading={isSubmitting}>
+          <Button type="submit" size="lg" className="mt-2 text-base" isLoading={isSubmitting}>
             Cadastrar
           </Button>
 
@@ -109,7 +115,7 @@ export default function SignUp() {
           </div>
 
           <p className="text-center">Já tem uma conta?</p>
-          <Button type="submit" className="uppercase mt-2" isLoading={isSubmitting} onClick={() => navigate('/')}>
+          <Button type="submit" size="lg" className="mt-2 text-base" isLoading={isSubmitting} onClick={() => navigate('/')}>
             <LogIn />
             Fazer login
           </Button>

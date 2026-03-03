@@ -7,21 +7,21 @@ export default function Dashboard() {
   const { dashboardData, loading } = useDashboard()
 
   return (
-    <main className="grid grid-cols-3 gap-6 p-4">
+    <main className="grid grid-cols-3 gap-6">
       <DashCard
-        icon={<Wallet className="text-purple-700" size={20} />}
+        icon={<Wallet className="text-purple-base" size={20} />}
         title="Saldo total"
         value={dashboardData?.totalBalance ?? 0}
         loading={loading}
       />
       <DashCard
-        icon={<CircleArrowUp className="text-green-700" size={20} />}
+        icon={<CircleArrowUp className="text-success" size={20} />}
         title="Receitas do mês"
         value={dashboardData?.monthlyIncome ?? 0}
         loading={loading}
       />
       <DashCard
-        icon={<CircleArrowDown className="text-red-700" size={20} />}
+        icon={<CircleArrowDown className="text-destructive" size={20} />}
         title="Despesas do mês"
         value={dashboardData?.monthlyExpenses ?? 0}
         loading={loading}

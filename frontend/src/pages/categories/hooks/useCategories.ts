@@ -14,11 +14,11 @@ type GqlCategory = {
 
 type GqlTransaction = {
   id: string;
-  category: { id: string } | null;
+  category: GqlCategory;
 };
 
 type GetCategoriesData = { categories: GqlCategory[] };
-type GetTransactionsData = { transactions: GqlTransaction[] };
+type GetTransactionsData = { transactions: { transactions: GqlTransaction[], totalCount: number } };
 
 export interface CategoriesStats {
   totalCategories: number;
@@ -35,7 +35,7 @@ export function useCategories() {
 
   const categories = useMemo((): Category[] => {
     const gqlCategories = categoriesData?.categories ?? [];
-    const transactions = transactionsData?.transactions ?? [];
+    const transactions = transactionsData?.transactions.transactions ?? [];
 
     const countMap = new Map<string, number>();
     transactions.forEach((t) => {
