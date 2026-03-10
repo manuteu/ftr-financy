@@ -33,7 +33,7 @@ export default function SignUp() {
       const result = await authStoreInstance.signUp(data);
       if (!result) return;
       reset();
-      // TODO redirect to home page
+      toast.success("Conta criada com sucesso");
     } catch (error) {
       toast.error(getGraphQLErrorMessage(error));
     }

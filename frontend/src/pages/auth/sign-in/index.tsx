@@ -50,6 +50,7 @@ export default function SignIn() {
         localStorage.removeItem(storage.REMEMBER_ME_EMAIL);
       }
       reset();
+      toast.success("Login realizado com sucesso");
     } catch (error) {
       toast.error(getGraphQLErrorMessage(error));
     }

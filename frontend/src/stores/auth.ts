@@ -85,15 +85,13 @@ export const useAuthStore = create<AuthState>()(
         try {
           const { data } = await apolloClient.mutate<
             SignUpMutationData,
-            { data: SignUpInput }
+            { name: string, email: string, password: string }
           >({
             mutation: SIGN_UP,
             variables: {
-              data: {
-                name: signUpData.name,
-                email: signUpData.email,
-                password: signUpData.password
-              }
+              name: signUpData.name,
+              email: signUpData.email,
+              password: signUpData.password
             }
           })
           if (data?.signUp) {

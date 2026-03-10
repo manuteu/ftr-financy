@@ -43,8 +43,8 @@ export function RecentTransactionsList({ transactions }: RecentTransactionsListP
             const colors = getCategoryColors(transaction.color)
 
             return (
-              <>
-                <div key={transaction.description} className="flex flex-row items-center justify-between px-6 py-4">
+              <div key={transaction.description}>
+                <div className="flex flex-row items-center justify-between px-6 py-4">
                   <div className="flex flex-row items-center gap-4 flex-1">
                     <Button variant="ghost" className={colors.bg} size="icon-lg">
                       <DynamicIcon name={transaction.icon as IconName} className={colors.text} />
@@ -65,7 +65,7 @@ export function RecentTransactionsList({ transactions }: RecentTransactionsListP
                   </div>
                 </div>
                 <Separator />
-              </>
+              </div>
             )
           })}
         </div>
