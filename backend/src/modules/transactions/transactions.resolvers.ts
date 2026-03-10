@@ -1,9 +1,10 @@
+import { Prisma } from '@prisma/client';
 import { GraphQLContext } from '../../shared/graphql/context';
 
 export const transactionResolvers = {
   Query: {
     transactions: async (
-      _: any,
+      _: unknown,
       args: {
         description?: string;
         type?: string;
@@ -19,7 +20,7 @@ export const transactionResolvers = {
         throw new Error('Não autenticado');
       }
 
-      const where: Record<string, any> = { userId: context.userId };
+      const where: Prisma.TransactionWhereInput = { userId: context.userId };
 
       if (args.description) {
         where.description = { contains: args.description };
@@ -52,7 +53,7 @@ export const transactionResolvers = {
     },
 
     transaction: async (
-      _: any,
+      _: unknown,
       { id }: { id: string },
       context: GraphQLContext
     ) => {
@@ -78,7 +79,7 @@ export const transactionResolvers = {
 
   Mutation: {
     createTransaction: async (
-      _: any,
+      _: unknown,
       args: {
         description: string;
         amount: number;
@@ -123,7 +124,7 @@ export const transactionResolvers = {
     },
 
     updateTransaction: async (
-      _: any,
+      _: unknown,
       args: {
         id: string;
         description?: string;
@@ -180,7 +181,7 @@ export const transactionResolvers = {
     },
 
     deleteTransaction: async (
-      _: any,
+      _: unknown,
       { id }: { id: string },
       context: GraphQLContext
     ) => {

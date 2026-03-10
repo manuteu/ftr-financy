@@ -4,7 +4,7 @@ import { generateToken } from '../../shared/utils/jwt';
 
 export const authResolvers = {
   Query: {
-    me: async (_: any, __: any, context: GraphQLContext) => {
+    me: async (_: unknown, __: unknown, context: GraphQLContext) => {
       if (!context.userId) {
         throw new Error('Não autenticado');
       }
@@ -30,7 +30,7 @@ export const authResolvers = {
 
   Mutation: {
     signUp: async (
-      _: any,
+      _: unknown,
       { email, password, name }: { email: string; password: string; name: string },
       context: GraphQLContext
     ) => {
@@ -68,7 +68,7 @@ export const authResolvers = {
     },
 
     signIn: async (
-      _: any,
+      _: unknown,
       { email, password }: { email: string; password: string },
       context: GraphQLContext
     ) => {

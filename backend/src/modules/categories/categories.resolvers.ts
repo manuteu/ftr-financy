@@ -2,7 +2,7 @@ import { GraphQLContext } from '../../shared/graphql/context';
 
 export const categoryResolvers = {
   Query: {
-    categories: async (_: any, __: any, context: GraphQLContext) => {
+    categories: async (_: unknown, __: unknown, context: GraphQLContext) => {
       if (!context.userId) {
         throw new Error('Não autenticado');
       }
@@ -14,7 +14,7 @@ export const categoryResolvers = {
     },
 
     category: async (
-      _: any,
+      _: unknown,
       { id }: { id: string },
       context: GraphQLContext
     ) => {
@@ -39,7 +39,7 @@ export const categoryResolvers = {
 
   Mutation: {
     createCategory: async (
-      _: any,
+      _: unknown,
       args: { name: string; color?: string; icon?: string; description?: string },
       context: GraphQLContext
     ) => {
@@ -59,7 +59,7 @@ export const categoryResolvers = {
     },
 
     updateCategory: async (
-      _: any,
+      _: unknown,
       args: { id: string; name?: string; color?: string; icon?: string; description?: string },
       context: GraphQLContext
     ) => {
@@ -90,7 +90,7 @@ export const categoryResolvers = {
     },
 
     deleteCategory: async (
-      _: any,
+      _: unknown,
       { id }: { id: string },
       context: GraphQLContext
     ) => {

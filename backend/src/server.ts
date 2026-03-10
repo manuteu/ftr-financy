@@ -35,18 +35,23 @@ function loadTypeDefs() {
   ].join('\n\n');
 }
 
-function mergeResolvers(...resolvers: any[]) {
-  const merged: any = {};
-  
+/** Objeto de resolvers por tipo (Query, Mutation, scalars, etc.). Valores são objetos de campos ou scalars. */
+type ResolversMap = Record<string, Record<string, unknown> | object>;
+
+function mergeResolvers(...resolvers: ResolversMap[]): ResolversMap {
+  const merged: ResolversMap = {};
+
   resolvers.forEach((resolver) => {
     Object.keys(resolver).forEach((key) => {
       if (!merged[key]) {
         merged[key] = {};
       }
-      merged[key] = { ...merged[key], ...resolver[key] };
+      const current = merged[key] as Record<string, unknown>;
+      const next = resolver[key] as Record<string, unknown>;
+      merged[key] = { ...current, ...next };
     });
   });
-  
+
   return merged;
 }
 
